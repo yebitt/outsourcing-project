@@ -61,6 +61,7 @@ public class TaskController {
         Long userId = 1L;
 
         TaskDeleteResponse response = taskService.deleteTask(userId, taskId);
+        // TODO 반환타입 메세지로 바꾸기
         return ResponseEntity.ok(response);
     }
 }
