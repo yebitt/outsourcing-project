@@ -1,5 +1,6 @@
 package com.example.outsourcingproject.entity;
 
+import com.example.outsourcingproject.exceptions.TaskException;
 import com.example.outsourcingproject.type.Priority;
 import com.example.outsourcingproject.type.Status;
 import jakarta.persistence.*;
@@ -44,42 +45,64 @@ public class Task extends BaseEntity {
     @Column(nullable = false)
     private Status status = Status.TODO; // 기본값 - 투두
 
-    @Column(name = "is_deleted")
-    private boolean isDeleted;
+    @Column(name = "is_deleted", nullable = false)
+    private boolean isDeleted = false;
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
     public Task() {}
 
-    public Task(String title, String description, Priority priority, User assignee,
-                User createdBy, LocalDateTime dueDate, LocalDateTime startDate, boolean isDeleted, LocalDateTime deletedAt) {
-        this.title = title;
-        this.description = description;
-        this.priority = priority;
-        this.assignee = assignee;
-        this.createdBy = createdBy;
-        this.dueDate = dueDate;
-        this.startDate = startDate;
-        this.isDeleted = isDeleted;
-        this.deletedAt = deletedAt;
-    }
-
     // TaskRequest dto에 대한 생성자
-    public Task(String title, String description, Priority priority, LocalDateTime dueDate, User assignee) {
+    public Task(String title, String description, Priority priority, LocalDateTime dueDate, User assignee, User creator) {
         this.title = title;
         this.description = description;
         this.priority = priority;
         this.dueDate = dueDate;
         this.assignee = assignee;
+
+        this.createdBy = creator;
     }
 
-    public void changeStatus(Status status) {
-        this.status = status;
-        // 시작일 설정
-        if(status == Status.IN_PROGRESS && this.startDate == null) {
-            this.startDate = LocalDateTime.now();
+    // 필드 변경/삭제 메서드들
+
+    public void changeStatus() {
+
+        if(this.startDate == null) {
+            this.status = Status.IN_PROGRESS;
+            this.startDate = LocalDateTime.now(); // 시작일 설정
+        } else if(this.status == Status.IN_PROGRESS) {
+            this.status = Status.DONE;
+        } else {
+            throw new TaskException("이미 DONE 상태입니다.");
         }
+    }
+
+    public void changeTitle(String title) {
+        this.title = title;
+    }
+
+    public void changeDescription(String description) {
+        this.description = description;
+    }
+
+    public void changePriority(String strPriority) {
+        Priority priority = Priority.fromString(strPriority);
+        this.priority = priority;
+    }
+
+    public void changeDueDate(LocalDateTime dueDate) {
+        this.dueDate = dueDate;
+    }
+
+    public void changeAssigneeId(User assignee) {
+        this.assignee = assignee;
+    }
+
+    public void delete() {
+        this.isDeleted = true;
+        // 삭제일 설정
+        this.deletedAt = LocalDateTime.now();
     }
 
 }

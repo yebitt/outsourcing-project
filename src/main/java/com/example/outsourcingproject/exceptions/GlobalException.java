@@ -22,6 +22,15 @@ public class GlobalException {
                 .body(e.getMessage());
     }
 
+    // TaskException 예외 처리
+    @ExceptionHandler(TaskException.class)
+    public ResponseEntity<String> handleTaskException(TaskException e) {
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(e.getMessage());
+    }
+
     // 유효성 검사 에러 처리
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationException(MethodArgumentNotValidException e) {
